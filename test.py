@@ -3,8 +3,8 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pyetymology import wikt_api
-from pyetymology.tests import test_llevar
+import wikt_api
+from tests import test_llevar
 
 
 G_llevar = test_llevar.G_llevar

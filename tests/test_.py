@@ -4,11 +4,11 @@ import dill
 import networkx as nx
 from mwparserfromhell.wikicode import Wikicode
 
-import pyetymology.eobjects.apiresult
-import pyetymology.eobjects.mwparserhelper
-from pyetymology import wikt_api as wx, queryobjects
-from pyetymology.etyobjects import Originator
-from pyetymology.queryobjects import ThickQuery
+import eobjects.apiresult
+import eobjects.mwparserhelper
+import wikt_api as wx, queryobjects
+from etyobjects import Originator
+from queryobjects import ThickQuery
 
 
 def fetch_wikitext(topic):
@@ -17,7 +17,7 @@ def fetch_wikitext(topic):
             txt = f.read()
             return txt
     except FileNotFoundError as error:
-        print('Asset not found! Creating...')
+        print("Asset not found! Creating...")
         # query, wikiresponse, origin = wx.query(topic).to_tupled()
         wikitext = wx.query(topic).wikitext
         # me, word, lang, def_id = query
@@ -26,10 +26,11 @@ def fetch_wikitext(topic):
             f2.write(wikitext)
         return wikitext
 
-def fetch_query(topic: str, lang: str, query_id:int=0) -> ThickQuery:
+
+def fetch_query(topic: str, lang: str, query_id: int = 0) -> ThickQuery:
     # monkeypatch.setattr('builtins.input', lambda _: lang)
     try:
-        with open("assets/query_" + topic + "_" + lang + ".txt", 'rb') as f:
+        with open("assets/query_" + topic + "_" + lang + ".txt", "rb") as f:
             pickleme = dill.load(f)
             query, wikiresponse, _ = pickleme
             origin = Originator(query[0], o_id=query_id)
@@ -44,19 +45,27 @@ def fetch_query(topic: str, lang: str, query_id:int=0) -> ThickQuery:
             dom, me, word, lang = auto_lang(dom, me, word, lang, mimic_input=mimic_input)
             The following mimics the function auto_lang()
             """
-            res, dom = pyetymology.eobjects.mwparserhelper.wikitextparse(wikitext, redundance=True)
-            dom = list(pyetymology.eobjects.mwparserhelper.sections_by_lang(dom, lang))  # expanded auto_lang()
+            res, dom = eobjects.mwparserhelper.wikitextparse(wikitext, redundance=True)
+            dom = list(
+                eobjects.mwparserhelper.sections_by_lang(dom, lang)
+            )  # expanded auto_lang()
 
             wikiresponse = None, res, dom
             bigQ = queryobjects.from_tupled(query, wikiresponse, origin)
             # TODO eliminate global state
             return bigQ
     except FileNotFoundError as error:
-        print('Asset not found! Creating...')
-        query, wikiresponse, origin = wx.query(topic, mimic_input=lang, query_id=query_id).to_tupled()
+        print("Asset not found! Creating...")
+        query, wikiresponse, origin = wx.query(
+            topic, mimic_input=lang, query_id=query_id
+        ).to_tupled()
         _, wikitext, dom = wikiresponse
         wikiresponse = None, str(wikitext), str(dom)
-        pickleme = query, wikiresponse, None # because origin id might change from query to query, don't pickle origin
+        pickleme = (
+            query,
+            wikiresponse,
+            None,
+        )  # because origin id might change from query to query, don't pickle origin
         with open("assets/query_" + topic + "_" + lang + ".txt", "wb") as output:
             dill.dump(pickleme, output, dill.HIGHEST_PROTOCOL)
 
@@ -67,53 +76,71 @@ def fetch_query(topic: str, lang: str, query_id:int=0) -> ThickQuery:
 
         dom, me, word, lang = auto_lang(dom, me, word, lang, mimic_input=mimic_input)
         """
-        res, dom = pyetymology.eobjects.mwparserhelper.wikitextparse(wikitext, redundance=True)
-        dom = list(pyetymology.eobjects.mwparserhelper.sections_by_lang(dom, lang))  # expanded auto_lang()
+        res, dom = eobjects.mwparserhelper.wikitextparse(wikitext, redundance=True)
+        dom = list(
+            eobjects.mwparserhelper.sections_by_lang(dom, lang)
+        )  # expanded auto_lang()
         wikiresponse = None, res, dom
         bigQ = queryobjects.from_tupled(query, wikiresponse, origin)
-         # don't do it over here because it is already done
+        # don't do it over here because it is already done
         return bigQ
+
+
 def fetch_resdom(topic, redundance=False) -> Tuple[Wikicode, List[Wikicode]]:
     wt = fetch_wikitext(topic)
-    res, dom = pyetymology.eobjects.mwparserhelper.wikitextparse(wt, redundance=redundance)
+    res, dom = eobjects.mwparserhelper.wikitextparse(wt, redundance=redundance)
     return res, dom
+
 
 def is_eq__repr(G, G__repr):
     # wx.draw_graph(G)
     # wx.draw_graph(G__repr)
     assert nx.is_isomorphic(G, G__repr)
 
-    assert set([repr(s) for s in G.nodes]) == set([s for s in G__repr.nodes])  # nx usually reverses the nodes, probably b/c of nx.add_path
+    assert set([repr(s) for s in G.nodes]) == set(
+        [s for s in G__repr.nodes]
+    )  # nx usually reverses the nodes, probably b/c of nx.add_path
     assert set((repr(l), repr(r)) for l, r in G.edges) == set(e for e in G__repr.edges)
-    return True # if there hasn't been an assertion error
+    return True  # if there hasn't been an assertion error
+
 
 def is_eq__str(G, G__str):
     assert nx.is_isomorphic(G, G__str)
 
-    assert set([str(s) for s in G.nodes]) == set([s for s in G__str.nodes])  # nx usually reverses the nodes, probably b/c of nx.add_path
+    assert set([str(s) for s in G.nodes]) == set(
+        [s for s in G__str.nodes]
+    )  # nx usually reverses the nodes, probably b/c of nx.add_path
     assert set((str(l), str(r)) for l, r in G.edges) == set(e for e in G__str.edges)
-    return True # if there hasn't been an assertion error
+    return True  # if there hasn't been an assertion error
+
 
 class MockInput:
     def __init__(self, inputs: List[str]):
         self.inputs = inputs
         self.idx = 0
+
     def next(self):
         if self.idx >= len(self.inputs):
-            raise Exception(f"Not enough mock inputs supplied! The function called {self.idx+1} user inputs, but only {self.inputs} was supplied!")
+            raise Exception(
+                f"Not enough mock inputs supplied! The function called {self.idx+1} user inputs, but only {self.inputs} was supplied!"
+            )
         self.idx += 1
+
+
 def patch_multiple_input(monkeypatch, inputs: List[str]):
     mock_input = MockInput(inputs)
-    monkeypatch.setattr('builtins.input', lambda _: mock_input.next())
+    monkeypatch.setattr("builtins.input", lambda _: mock_input.next())
 
 
 class Test:
     def test_exact_prefix(self):
-        assert pyetymology.eobjects.mwparserhelper.has_exact_prefix("==Spanish==", "==")
-        assert not pyetymology.eobjects.mwparserhelper.has_exact_prefix("===Etymology===", "==")
+        assert eobjects.mwparserhelper.has_exact_prefix("==Spanish==", "==")
+        assert not eobjects.mwparserhelper.has_exact_prefix("===Etymology===", "==")
+
     def test_null_sections_by_level(self):
         dom = fetch_resdom("llevar")[1]
-        assert list(pyetymology.eobjects.mwparserhelper.sections_by_level(dom, 6)) == []
+        assert list(eobjects.mwparserhelper.sections_by_level(dom, 6)) == []
+
     def test_fetch(self):
         return  # don't make too many API queries
         Q1 = fetch_query("adelante", "Spanish")
@@ -131,4 +158,6 @@ class Test:
 
 def graph_to_str(G):
     return repr(nx.to_dict_of_lists(G))
+
+
 # TODO: Test Unsupported Titles

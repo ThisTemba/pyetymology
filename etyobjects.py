@@ -7,12 +7,10 @@ import networkx as nx
 import mwparserfromhell
 from mwparserfromhell.nodes import Template
 
-import pyetymology.queryobjects
-import pyetymology.queryutils
-from pyetymology.langcode import langcodes
-from pyetymology.emulate import moduleimpl
-
-
+import queryobjects
+import queryutils
+from langcode import langcodes
+from emulate import moduleimpl
 
 
 @property
@@ -23,6 +21,8 @@ def originator_id_incrementer():
 @originator_id_incrementer.setter
 def originator_id_incrementer(a):
     raise Exception("Deprecated")
+
+
 originator_id_incrementer = 0
 
 
@@ -32,18 +32,23 @@ def reset_global_o_id():
     global originator_id_incrementer
     originator_id_incrementer = 0
 
+
 def try_get(template: Template, key: str, default="", warn=True, throw=False) -> str:
     if template.has(key):
         return str(template.get(key))
     else:
         if throw:
-            raise ValueError(f"Template {template} doesn't have value defined at index {key}!")
+            raise ValueError(
+                f"Template {template} doesn't have value defined at index {key}!"
+            )
         if warn:
-            warnings.warn(f"Template {template} doesn't have a word defined at index {key}! This is strange but apparently possible.")
+            warnings.warn(
+                f"Template {template} doesn't have a word defined at index {key}! This is strange but apparently possible."
+            )
     return default
 
-class Originator:
 
+class Originator:
 
     def __init__(self, me: Any, o_id: int = None):
         self.me = me
@@ -64,14 +69,15 @@ class Originator:
     def __repr__(self):
         return str(self.me) + "$" + str(self.o_id)
 
+
 class Affixal:
     def __init__(self, template: mwparserfromhell.wikicode.Template, rtype: string):
         params = template.params
         self.template = template
         if rtype == "pre":
-            self.root = str(template.get("3")) # params[2] lua has 1-indexed arrays
+            self.root = str(template.get("3"))  # params[2] lua has 1-indexed arrays
         elif rtype == "suf":
-            self.root = str(template.get("2")) # params[1]
+            self.root = str(template.get("2"))  # params[1]
         # elif rtype == "con":
         else:
             self.root = ""
@@ -79,9 +85,18 @@ class Affixal:
 
 
 class WordRelation:
-    def matches_query(self, me:str, strict=False, ultra_strict=False, warn=False) -> bool:
-        word, biglang, _ = pyetymology.queryutils.query_to_qparts(me, warn)
-        return moduleimpl.matches(self.word, self.langname, word, biglang.langname, strict=strict, ultra_strict=ultra_strict)
+    def matches_query(
+        self, me: str, strict=False, ultra_strict=False, warn=False
+    ) -> bool:
+        word, biglang, _ = queryutils.query_to_qparts(me, warn)
+        return moduleimpl.matches(
+            self.word,
+            self.langname,
+            word,
+            biglang.langname,
+            strict=strict,
+            ultra_strict=ultra_strict,
+        )
         # TODO: NOT iterate through entire graph when trying to find a match
 
     @property
@@ -104,36 +119,41 @@ class WordRelation:
             self._selflangname = langcodes.name(_selflang)
 
 
-
 class EtyRelation(WordRelation):
-    ety_abbrs = {"derived": "der",
-                 "inherited": "inh",
-                 "borrowed": "bor",
-                 "orthographic borrowing": "obor",
-                 "learned borrowing": "lbor",
-                 "calque": "cal",
-                 "semantic loan": "sl",
-                 }
-    cog_abbrs = {"cognate": "cog",
-                 "noncognate": "ncog",
-                 "noncog": "ncog",
-                 "nc": "ncog",
-                 "doublet": "doublet",
-                 "piecewise doublet": "piecewise doublet"
-                 }
+    ety_abbrs = {
+        "derived": "der",
+        "inherited": "inh",
+        "borrowed": "bor",
+        "orthographic borrowing": "obor",
+        "learned borrowing": "lbor",
+        "calque": "cal",
+        "semantic loan": "sl",
+    }
+    cog_abbrs = {
+        "cognate": "cog",
+        "noncognate": "ncog",
+        "noncog": "ncog",
+        "nc": "ncog",
+        "doublet": "doublet",
+        "piecewise doublet": "piecewise doublet",
+    }
     sim_abbrs = {"mention": "m"}
 
-    aff_abbrs = {"affix": "af",
-                 "prefix": "pre",
-                 "confix": "con",
-                 "suffix": "suf",
-                 "compound": "com"}
+    aff_abbrs = {
+        "affix": "af",
+        "prefix": "pre",
+        "confix": "con",
+        "suffix": "suf",
+        "compound": "com",
+    }
 
     # lemma_ = {}
     # https://en.wiktionary.org/wiki/Category:Form-of_templates
     # https://en.wiktionary.org/wiki/Module:form_of/data
 
-    def __init__(self, origin: Originator, template: mwparserfromhell.wikicode.Template):
+    def __init__(
+        self, origin: Originator, template: mwparserfromhell.wikicode.Template
+    ):
         self.origin = origin  # type: Originator
 
         rtype = str(template.name)
@@ -158,7 +178,9 @@ class EtyRelation(WordRelation):
         self.affixal = None
         if rtype in ety_abbrs.values():  # if it's an etymological relation
             _selflang = str(template.get("1"))  # str(params[0])
-            lang = str(template.get("2"))  # https://en.wiktionary.org/wiki/Template:derived
+            lang = str(
+                template.get("2")
+            )  # https://en.wiktionary.org/wiki/Template:derived
             word = try_get(template, "3")
 
         elif rtype in cog_abbrs.values() or rtype in sim_abbrs.values():
@@ -180,8 +202,6 @@ class EtyRelation(WordRelation):
 
         WordRelation.__init__(self, params, rtype, lang, word, _selflang)
 
-
-
     def __str__(self):
         if not self:
             return "{{" + self.rtype + " null " + repr(self.params) + "}}"
@@ -200,7 +220,9 @@ class EtyRelation(WordRelation):
 
 class LemmaRelation(WordRelation):
 
-    def __init__(self, origin: Originator, template: mwparserfromhell.wikicode.Template):
+    def __init__(
+        self, origin: Originator, template: mwparserfromhell.wikicode.Template
+    ):
         self.origin = origin  # type: Originator
 
         rtype = str(template.name)
@@ -250,7 +272,9 @@ class LemmaRelation(WordRelation):
         paramsc = repr(self.params[2:])  # slice off the first 2 args
         paramsc = "" if paramsc == "[]" else " " + paramsc  # convert []s to ""
 
-        return "L{" + self.rtype + "|" + self.langname + "|" + self.word + "}" # + paramsc + "}"
+        return (
+            "L{" + self.rtype + "|" + self.langname + "|" + self.word + "}"
+        )  # + paramsc + "}"
         # return f"L{{{self.rtype}|{self.langname}|{self.word}}}"
 
     def __repr__(self):
@@ -261,17 +285,24 @@ class LemmaRelation(WordRelation):
 
 
 class DescentRelation(WordRelation):
-    desc_abbrs = {"descendant": "desc",
-                  "see descendants": "see desc"} # https://en.wiktionary.org/wiki/Template:descendant
+    desc_abbrs = {
+        "descendant": "desc",
+        "see descendants": "see desc",
+    }  # https://en.wiktionary.org/wiki/Template:descendant
 
-    def __init__(self, origin: Originator, template: mwparserfromhell.wikicode.Template, query_opt:str=None):
+    def __init__(
+        self,
+        origin: Originator,
+        template: mwparserfromhell.wikicode.Template,
+        query_opt: str = None,
+    ):
 
-
-
-        self.origin = origin  # type: Originator  # TODO: create convenience super() init method
+        self.origin = (
+            origin
+        )  # type: Originator  # TODO: create convenience super() init method
 
         if query_opt:
-            word, _Lang, qflags = pyetymology.queryutils.query_to_qparts(query_opt)
+            word, _Lang, qflags = queryutils.query_to_qparts(query_opt)
             self.word = word
             self.langname = _Lang.langname
             self.rtype = "custom"
@@ -291,8 +322,12 @@ class DescentRelation(WordRelation):
         self.null = False
         self.affixal = None
         _selflang = None
-        if rtype in abbrs.values():  # see https://en.wiktionary.org/wiki/Template:descendant: uses same layout as link and mention
-            if rtype != "see desc": # exclude this, which just marks to see for further descendants
+        if (
+            rtype in abbrs.values()
+        ):  # see https://en.wiktionary.org/wiki/Template:descendant: uses same layout as link and mention
+            if (
+                rtype != "see desc"
+            ):  # exclude this, which just marks to see for further descendants
                 lang = str(template.get("1"))
                 word = try_get(template, "2")
                 # raise MissingException(f"Template {template} didn't have expected index {str(e)}", missing_thing="template_attribute")
@@ -316,27 +351,30 @@ class DescentRelation(WordRelation):
     def __repr__(self):
         return "$" + str(self.origin.o_id) + str(self)
 
+
 class DisrepancyError(Exception):
-    def __init__(self, message, descrepancy=None, G:nx.DiGraph = None):
+    def __init__(self, message, descrepancy=None, G: nx.DiGraph = None):
         super().__init__(self, message)
         self.G = G
         self.descrepancy = descrepancy
         self.message = message
 
+
 class MissingException(Exception):
 
-    def __init__(self, message, missing_thing=None, G:nx.DiGraph = None):
+    def __init__(self, message, missing_thing=None, G: nx.DiGraph = None):
         super().__init__(self, message)
         self.G = G
         self.missing_thing = missing_thing
         self.message = message
 
+
 class MissingInputException(MissingException):
     def __init__(self, *args, **kwargs):
         super(MissingException, self).__init__(*args, **kwargs)
+
 
 class InputException(Exception):
     """
     When more user info/input is needed, and console input is disabled.
     """
-

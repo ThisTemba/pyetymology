@@ -3,21 +3,21 @@ import warnings
 import mwparserfromhell as mwp
 import requests
 
-import pyetymology.emulate.template2url
-import pyetymology.queryobjects
-import pyetymology.queryutils
-from pyetymology.eobjects import fixins
-from pyetymology.eobjects.wikikey import WikiKey
-from pyetymology.langhelper import Language
-from pyetymology.queryobjects import ThickQuery, DummyQuery
-from pyetymology.langcode.cache import Cache
+import emulate.template2url
+import queryobjects
+import queryutils
+from eobjects import fixins
+from eobjects.wikikey import WikiKey
+from langhelper import Language
+from queryobjects import ThickQuery, DummyQuery
+from langcode.cache import Cache
 import grandalf.utils as grutils
 import networkx as nx
 
 # matplotlib.use('WXAgg')
 import matplotlib.pyplot as plt
 
-from pyetymology import simple_sugi, lexer
+import simple_sugi, lexer
 
 ### START helper_api.py
 from typing import List, Dict, Union
@@ -26,7 +26,7 @@ import mwparserfromhell
 
 # from mwparserfromhell.wikicode import Wikicode
 
-from pyetymology.etyobjects import (
+from etyobjects import (
     EtyRelation,
     WordRelation,
     Originator,
@@ -35,9 +35,9 @@ from pyetymology.etyobjects import (
     MissingException,
     DisrepancyError,
 )
-from pyetymology.lexer import Header
+from lexer import Header
 
-from pyetymology.eobjects.fixins import input
+from eobjects.fixins import input
 
 """
 !! IMPORTANT! input is modified!
@@ -144,9 +144,7 @@ def query(
                         # word = wkey.word
                         # biglang = wkey.Lang
                         assert wkey.qflags is None
-                        wkey.qflags = pyetymology.queryutils.query_to_qparts(
-                            me, warn=False
-                        )[
+                        wkey.qflags = queryutils.query_to_qparts(me, warn=False)[
                             2
                         ]  # merge query and node
                         done = True

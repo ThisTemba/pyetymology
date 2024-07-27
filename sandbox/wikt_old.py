@@ -1,7 +1,7 @@
 import requests
 
 # Credits to Suyash Behera at https://pypi.org/project/wiktionaryparser/
-from pyetymology.sandbox import helper_old
+from sandbox import helper_old
 
 session = requests.Session()
 session.mount(

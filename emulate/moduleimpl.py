@@ -1,10 +1,9 @@
-
 # https://en.wiktionary.org/wiki/Module:links
 import warnings
 from typing import Union
 
-from pyetymology.emulate.template2url import urllang, urlify, keyword
-from pyetymology.langhelper import Language
+from emulate.template2url import urllang, urlify, keyword
+from langhelper import Language
 
 
 class QueryFlags:
@@ -13,25 +12,45 @@ class QueryFlags:
         self.deriv = deriv
 
 
-def to_link(word_or_urlword: str, lang_or_none:Union[Language, str, None] = None, qflags:QueryFlags=None, target_lang:str= "English", target_results:int=50, warn=True):
+def to_link(
+    word_or_urlword: str,
+    lang_or_none: Union[Language, str, None] = None,
+    qflags: QueryFlags = None,
+    target_lang: str = "English",
+    target_results: int = 50,
+    warn=True,
+):
     if lang_or_none is None:
         _urlword = word_or_urlword
-        return "http://en.wiktionary.org/w/api.php?action=parse&page=" + _urlword + "&prop=wikitext&formatversion=2&format=json"
+        return (
+            "http://en.wiktionary.org/w/api.php?action=parse&page="
+            + _urlword
+            + "&prop=wikitext&formatversion=2&format=json"
+        )
     else:
         word = word_or_urlword
         lang = lang_or_none
         if qflags and qflags.deriv:
             # apparently you have to use an entirely different API (https://stackoverflow.com/questions/19285346/how-to-download-a-category-of-words-from-wiktionary)
-            return f"http://en.wiktionary.org/w/api.php?action=query&list=categorymembers&cmtitle=" \
-                   f"Category:{target_lang}_terms_derived_from_the_{urllang(lang)}_root_{urlword(word, lang.langname, strip_reconstr_star=False, warn=warn)}&cmprop=title" \
-                   f"&format=json&cmlimit={target_results}"
+            return (
+                f"http://en.wiktionary.org/w/api.php?action=query&list=categorymembers&cmtitle="
+                f"Category:{target_lang}_terms_derived_from_the_{urllang(lang)}_root_{urlword(word, lang.langname, strip_reconstr_star=False, warn=warn)}&cmprop=title"
+                f"&format=json&cmlimit={target_results}"
+            )
             #  to_link(urlword(word=word, lang=lang))
         elif isinstance(lang, str) or isinstance(lang, Language):
             return to_link(urlword(word=word, lang=lang, warn=warn))
         else:
             raise TypeError(f"lang has unexpected type {type(lang)}")
 
-def urlword(word: str, lang: Union[str, Language, None], strip_reconstr_star=True, warn=True, crash=False) -> str:  # TODO: test this
+
+def urlword(
+    word: str,
+    lang: Union[str, Language, None],
+    strip_reconstr_star=True,
+    warn=True,
+    crash=False,
+) -> str:  # TODO: test this
     """
     Generates a urlword from what's used in the template.
     See https://en.wiktionary.org/wiki/Template:mention under "|2= (optional)
@@ -59,7 +78,9 @@ def urlword(word: str, lang: Union[str, Language, None], strip_reconstr_star=Tru
         if crash:
             raise ValueError(f"{word}'s lang is blank!")
         if warn:
-            warnings.warn(f"retrieving {word}'s urlword without a lang! no macrons etc.")
+            warnings.warn(
+                f"retrieving {word}'s urlword without a lang! no macrons etc."
+            )
         return urlify(keyword(word, strip_reconstr_star=strip_reconstr_star))
     if isinstance(lang, str):
         # lang is langname
@@ -72,13 +93,16 @@ def urlword(word: str, lang: Union[str, Language, None], strip_reconstr_star=Tru
     else:
         return urlword(word, lang.langname, warn=warn, crash=crash)
 
+
 # Below are implementations of urlword(word, lang: str)
 
 
 def matches(word1, langname1, word2, langname2, strict=False, ultra_strict=False):
-    if langname1 and langname2: # if there are two defined languages
-        lang_check = (langname1 == langname2)
-        return lang_check and urlword(word1, langname1, crash=True) == urlword(word2, langname2, crash=True) # we should never be warned, because they should be defined
+    if langname1 and langname2:  # if there are two defined languages
+        lang_check = langname1 == langname2
+        return lang_check and urlword(word1, langname1, crash=True) == urlword(
+            word2, langname2, crash=True
+        )  # we should never be warned, because they should be defined
     else:
         # otherwise, one of them must be blank
         # therefore, compensation for macrons and sht is messed up
@@ -86,7 +110,9 @@ def matches(word1, langname1, word2, langname2, strict=False, ultra_strict=False
             return False
         # if we are lenient
         if strict:
-            return urlword(word1, langname1, warn=False) == urlword(word2, langname2, warn=False) # we expect missing languages
+            return urlword(word1, langname1, warn=False) == urlword(
+                word2, langname2, warn=False
+            )  # we expect missing languages
             """
             Equality is well defined: transitive, etc. everything you'd expect from equality
             plicō#Latin == plico#Latin == plico =/= plicō
@@ -94,7 +120,9 @@ def matches(word1, langname1, word2, langname2, strict=False, ultra_strict=False
             plicō =/= plico
             """
         else:
-            return word1 == word2 or urlword(word1, langname1, warn=False) == urlword(word2, langname2, warn=False)
+            return word1 == word2 or urlword(word1, langname1, warn=False) == urlword(
+                word2, langname2, warn=False
+            )
             # if there's a lang-omitted term ("query") AND a lang-present term:
             # the "query" will match BOTH the literal word-lang OR the reduced word-lang.
             # for example plico will match plicō#Latin b/c plico matches the reduced word-lang.

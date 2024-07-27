@@ -3,9 +3,10 @@ from typing import Any
 
 from matplotlib import pyplot as plt
 
-from pyetymology.etyobjects import InputException
+from etyobjects import InputException
 
 _is_plot_active = False
+
 
 def input(__prompt: Any) -> str:
     # raise InputException("Unable to read from console.") from None

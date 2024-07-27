@@ -1,7 +1,7 @@
 from typing import Union, Tuple
 
-from pyetymology.emulate.moduleimpl import QueryFlags
-from pyetymology.langhelper import Language
+from emulate.moduleimpl import QueryFlags
+from langhelper import Language
 
 
 def node_to_qparts(

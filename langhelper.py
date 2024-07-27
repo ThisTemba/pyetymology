@@ -1,6 +1,6 @@
 import warnings
 
-from pyetymology.langcode import langcodes
+from langcode import langcodes
 
 
 class Language:

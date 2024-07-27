@@ -1,6 +1,6 @@
 import warnings
 
-from pyetymology.langcode import famcodes, etycodes, gencodes
+from langcode import famcodes, etycodes, gencodes
 
 
 def name(code, use_ety=False, use_fam=False) -> str:
@@ -14,6 +14,7 @@ def name(code, use_ety=False, use_fam=False) -> str:
         if dict is not None:
             val = dict["canonicalName"]
     return val
+
 
 def is_reconstr(code) -> bool:
     warnings.warn("is_reconstr USES FLAWED LOGIC")

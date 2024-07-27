@@ -64,7 +64,7 @@ for sec in sections:
         between_text = []
 
         check_type = False
-        cache = pyetymology.langcode.cache.Cache(4)
+        cache = langcode.cache.Cache(4)
         for bib in firstsentence: # time to analyze the immediate etymology ("ancestry")
             if bib is None:
                 continue

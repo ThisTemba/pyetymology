@@ -1,16 +1,16 @@
 import warnings
 from typing import Tuple, List
 
-from pyetymology import wikt_api as ety, etyobjects
+import wikt_api as ety, etyobjects
 import networkx as nx  # rumored to be slow, but I'm just using it temporarily
 
 
-from pyetymology.etyobjects import Originator
+from etyobjects import Originator
 
 # https://iconscout.com/blog/15-classic-color-scheme-generators-to-pick-the-perfect-palette
 
 # online = True
-from pyetymology.tests import test_
+from tests import test_
 
 
 def mainloop(

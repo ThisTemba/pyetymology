@@ -8,12 +8,13 @@ import pytest
 from _pytest import monkeypatch
 from mwparserfromhell.wikicode import Wikicode
 
-from pyetymology import wikt_api as wx, etyobjects
-from pyetymology.etyobjects import MissingException
-from pyetymology.tests import assets, asset_llevar
+import wikt_api as wx, etyobjects
+from etyobjects import MissingException
+from tests import assets, asset_llevar
 import mwparserfromhell as mwp
 
-from pyetymology.tests.test_ import fetch_resdom, fetch_query
+from tests.test_ import fetch_resdom, fetch_query
+
 
 class TestStatt:
     def test_missing_definition_graph(self):

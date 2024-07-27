@@ -2,9 +2,9 @@ from typing import List, Union
 
 from mwparserfromhell.wikicode import Wikicode
 
-from pyetymology import wikt_api as wikt
-from pyetymology.eobjects import mwparserhelper
-from pyetymology.langcode import poscodes
+import wikt_api as wikt
+from eobjects import mwparserhelper
+from langcode import poscodes
 
 
 def get_header_type(wc: Wikicode, lvl: int):

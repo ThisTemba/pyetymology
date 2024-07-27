@@ -2,13 +2,13 @@ from typing import List, Tuple, Optional
 
 from mwparserfromhell.wikicode import Wikicode
 
-from pyetymology.eobjects.wikikey import WikiKey
-from pyetymology.etyobjects import Originator
-from pyetymology.langhelper import Language
-from pyetymology.emulate.moduleimpl import QueryFlags
-from pyetymology.emulate import moduleimpl
+from eobjects.wikikey import WikiKey
+from etyobjects import Originator
+from langhelper import Language
+from emulate.moduleimpl import QueryFlags
+from emulate import moduleimpl
 
-from pyetymology.queryutils import query_to_qparts
+from queryutils import query_to_qparts
 
 
 class ThickQuery:

@@ -6,18 +6,18 @@ def query(me, query_id=0, mimic_input=None, redundance=False, working_G: nx.DiGr
     done = False
     if working_G:
         node = find_node_by_query(working_G, me, warn=False)
-        # word, biglang, qflags = pyetymology.queryobjects.node_to_qparts(node)
+        # word, biglang, qflags = queryobjects.node_to_qparts(node)
         # assert qflags is None
         wkey = WikiKey.from_node(node)
         if wkey:
             # word = wkey.word
             # biglang = wkey.Lang
             assert wkey.qflags is None
-            wkey.qflags = pyetymology.queryutils.query_to_qparts(me, warn=False)[2] # merge query and node
+            wkey.qflags = queryutils.query_to_qparts(me, warn=False)[2] # merge query and node
             done = True
     if not done: # default condition
         wkey = WikiKey.from_query(me, warn=False) # we permit null langs here
-        # word, biglang, qflags = pyetymology.queryobjects.query_to_qparts(me, warn=False) # missing language is an expected value
+        # word, biglang, qflags = queryobjects.query_to_qparts(me, warn=False) # missing language is an expected value
 
     # word_urlify = urllib.parse.quote_plus(word) # src = moduleimpl.to_link(word, biglang, qflags, warn=False)
     # src = "https://en.wiktionary.org/w/api.php?action=parse&page=" + word_urlify + "&prop=wikitext&formatversion=2&format=json"

@@ -1,6 +1,6 @@
 from typing import Any
 
-from pyetymology.etyobjects import Originator  # TODO: refactor that into this class
+from etyobjects import Originator  # TODO: refactor that into this class
 
 
 class OriginsTracker:

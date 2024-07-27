@@ -1,4 +1,4 @@
-from pyetymology.main import mainloop
+from main import mainloop
 
 if __name__ == "__main__":
     print("main")

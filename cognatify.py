@@ -1,6 +1,6 @@
 from pprint import pprint
 
-from pyetymology.wikt_mod import WiktionaryParser
+from wikt_mod import WiktionaryParser
 
 parser = WiktionaryParser()
 parser.include_relation("url")
