@@ -4,7 +4,14 @@ from pyetymology.langcode import langcodes
 
 
 class Language:
-    def __init__(self, langcode: str=None, langname: str=None, langqstr: str=None, is_reconstr: bool=False, warn=True):
+    def __init__(
+        self,
+        langcode: str = None,
+        langname: str = None,
+        langqstr: str = None,
+        is_reconstr: bool = False,
+        warn=True,
+    ):
         """
         langcode: Wikt Language Code            ie. es, ine-pro
         langname: Name of Language              ie. Spanish, Proto-Indo-European
@@ -15,8 +22,8 @@ class Language:
         BUT
         langqstr                                Old English does not get inferred!
         """
-        analyze_lname=False
-        if langcode: # if we're given a langcode, we can generate everything else
+        analyze_lname = False
+        if langcode:  # if we're given a langcode, we can generate everything else
             if not is_reconstr:
                 is_reconstr = langcodes.is_reconstr(langcode)
             if not langname:
@@ -24,7 +31,7 @@ class Language:
             self.langcode = langcode
             self.langname = langname
             self.reconstr = is_reconstr
-        elif langqstr: # if we're not given a langcode, but we're given a langqstr
+        elif langqstr:  # if we're not given a langcode, but we're given a langqstr
             self.langcode = None
             if langqstr.startswith("R:"):
                 self.langname = langqstr[2:]
@@ -32,7 +39,9 @@ class Language:
             elif langqstr.startswith("Reconstruction:"):
                 self.langname = langqstr[15:]
                 self.reconstr = True
-            elif langqstr.startswith("Proto-"): # Workaround while I get wikikey working on the prod version
+            elif langqstr.startswith(
+                "Proto-"
+            ):  # Workaround while I get wikikey working on the prod version
                 self.langname = langqstr
                 self.reconstr = True
             else:
@@ -61,16 +70,27 @@ class Language:
             if not langname:
                 if warn:
                     warnings.warn("Neither langcode nor langname received.")
-        self.langqstr = ("R:" + self.langname) if self.reconstr and self.langname else (self.langname)
+        self.langqstr = (
+            ("R:" + self.langname)
+            if self.reconstr and self.langname
+            else (self.langname)
+        )
 
     def __bool__(self):
         return bool(self.langcode or self.langname)
 
     def __eq__(self, other):
-        if isinstance(other, Language) and bool(self) == bool(other) and self.reconstr == other.reconstr:
+        if (
+            isinstance(other, Language)
+            and bool(self) == bool(other)
+            and self.reconstr == other.reconstr
+        ):
             if self.langcode and other.langcode:
                 if self.langname and other.langname:
-                    return self.langcode == other.langcode and self.langname == other.langname
+                    return (
+                        self.langcode == other.langcode
+                        and self.langname == other.langname
+                    )
                 else:
                     return self.langcode == other.langcode
             else:
@@ -82,8 +102,8 @@ class Language:
         else:
             return False
 
-
         return False
+
     def __str__(self):
         return self.langqstr if self else ""
 

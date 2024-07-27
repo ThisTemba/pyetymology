@@ -3,7 +3,10 @@ from typing import Union, Tuple
 from pyetymology.emulate.moduleimpl import QueryFlags
 from pyetymology.langhelper import Language
 
-def node_to_qparts(node: Union['EtyRelation', 'LemmaRelation', None]) -> Tuple[str, Language, QueryFlags]:
+
+def node_to_qparts(
+    node: Union["EtyRelation", "LemmaRelation", None]
+) -> Tuple[str, Language, QueryFlags]:
     if node:
         word = node.word
         if node.langcode:
@@ -17,13 +20,19 @@ def node_to_qparts(node: Union['EtyRelation', 'LemmaRelation', None]) -> Tuple[s
             # langname = ""
             lang = None
         found = True
-        return word, lang, None # TODO: store def_id info in the node, perhaps by keeping track of it in the originator
+        return (
+            word,
+            lang,
+            None,
+        )  # TODO: store def_id info in the node, perhaps by keeping track of it in the originator
     # TODO: rename originator into a QueryInfo object that stores info on the query, including the def_id
     # TODO: because def_id is essentially metainfo that isn't retained in the template.
     return None, None, None
 
 
-def query_to_qparts(query: str, warn=True, crash=False) -> Tuple[str, Language, QueryFlags]:
+def query_to_qparts(
+    query: str, warn=True, crash=False
+) -> Tuple[str, Language, QueryFlags]:
     """
     The returned qflags and qflags.def_id WILL be initialized and is guaranteed nonnull.
     """
@@ -49,11 +58,14 @@ def query_to_qparts(query: str, warn=True, crash=False) -> Tuple[str, Language, 
         def_id = int(def_id)
     else:
         raise Exception(
-            f'Query string "{query}" has an unsupported number of arguments! There should be either 1-3 terms only,')
+            f'Query string "{query}" has an unsupported number of arguments! There should be either 1-3 terms only,'
+        )
     if not langqstr and crash:
-        raise ValueError("Language inferral (or having a blank language in your query) is not permitted/expected.")
+        raise ValueError(
+            "Language inferral (or having a blank language in your query) is not permitted/expected."
+        )
     _Lang = Language(langqstr=langqstr, warn=warn)
     # The only time langqstr can be empty is if the function was specifically authorized to allow no-langs.
     if def_id == None:
-        def_id = 1 # new default value for def_id
+        def_id = 1  # new default value for def_id
     return word, _Lang, QueryFlags(def_id=def_id, deriv=do_deriv)

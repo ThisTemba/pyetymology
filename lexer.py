@@ -8,19 +8,36 @@ from pyetymology.langcode import poscodes
 
 
 def get_header_type(wc: Wikicode, lvl: int):
-    breve: str = wc[lvl:]  # len("===") == 3 # "===Pronunciation===" --> "Pronunciation==="
-    header_type = breve[:breve.index("=" * lvl)]  # "Pronunciation===" -> "Pronunciation"
+    breve: str = wc[
+        lvl:
+    ]  # len("===") == 3 # "===Pronunciation===" --> "Pronunciation==="
+    header_type = breve[
+        : breve.index("=" * lvl)
+    ]  # "Pronunciation===" -> "Pronunciation"
     return header_type
 
 
 class Header:
 
-    def __init__(self, wikicode: Wikicode, subordinates: List[Wikicode], header_type: str = None, idx: int = None,
-                 metainfo=None, lvl: int = 3):
-        assert wikicode.startswith("="*lvl) and not wikicode.startswith("="*(lvl+1))  # assert that the level is correct
+    def __init__(
+        self,
+        wikicode: Wikicode,
+        subordinates: List[Wikicode],
+        header_type: str = None,
+        idx: int = None,
+        metainfo=None,
+        lvl: int = 3,
+    ):
+        assert wikicode.startswith("=" * lvl) and not wikicode.startswith(
+            "=" * (lvl + 1)
+        )  # assert that the level is correct
         if header_type is None:  # auto header type deduce
-            breve: str = wikicode[lvl:]  # len("===") == 3 # "===Pronunciation===" --> "Pronunciation==="
-            header_type = breve[:breve.index("="*lvl)]  # "Pronunciation===" -> "Pronunciation"
+            breve: str = wikicode[
+                lvl:
+            ]  # len("===") == 3 # "===Pronunciation===" --> "Pronunciation==="
+            header_type = breve[
+                : breve.index("=" * lvl)
+            ]  # "Pronunciation===" -> "Pronunciation"
 
             if idx is None and header_type.startswith("Etymology "):  # auto idx deduce
                 assert len(header_type) >= 11  # len("Etymology 1")
@@ -31,30 +48,38 @@ class Header:
             if defn_flag and metainfo is None:
                 metainfo = "Definition"
 
-
         self.wikicode = wikicode
         self.subordinates = subordinates
         self.idx = idx
         self.header_type = header_type
-        self.metainfo = header_type if metainfo is None else metainfo  # TODO: make it into an enum
+        self.metainfo = (
+            header_type if metainfo is None else metainfo
+        )  # TODO: make it into an enum
         self.lvl = lvl
-
 
     @property
     def exact_header(self):
-        return "=" * self.lvl + self.header_type + ("" if self.idx is None else " " + str(self.idx)) + "=" * self.lvl
+        return (
+            "=" * self.lvl
+            + self.header_type
+            + ("" if self.idx is None else " " + str(self.idx))
+            + "=" * self.lvl
+        )
 
     def __str__(self):
         return str(self.wikicode)
 
+
 class Entry:
 
     def __init__(self, ety: Header, extras: List[Header], desc: List[Header]):
-        assert ety or extras or desc # can't all be blank
+        assert ety or extras or desc  # can't all be blank
         assert ety is None or isinstance(ety, Header)
         self.ety = ety  # type: Header
         self.extras = extras  # type: List[Header]
         self.desc = desc
+
+
 def lex(dom: List[Wikicode]) -> List[Entry]:
     is_multi_ety = None
 
@@ -107,7 +132,9 @@ def lex(dom: List[Wikicode]) -> List[Entry]:
 
             h = Header(lvl3, lvl3plus[1:])
             if poscodes.is_defn(lvl3):
-                assert not is_multi_ety  # if there's multiple etymologies, then the verbs SHOULD have been put in a nested level
+                assert (
+                    not is_multi_ety
+                )  # if there's multiple etymologies, then the verbs SHOULD have been put in a nested level
                 assert "Definition" in h.metainfo
                 did_lemma = True
             if is_multi_ety is None:
@@ -123,7 +150,6 @@ def lex(dom: List[Wikicode]) -> List[Entry]:
     if is_multi_ety is None or is_multi_ety is False:
         assert entries == []
         nonetys = preety + nonetys
-
 
     # package remnants
     if ety or nonetys or desc:

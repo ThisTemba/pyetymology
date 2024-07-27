@@ -13,7 +13,9 @@ def pos(G: nx.DiGraph, roots=None, g=None, xspace=20, yspace=20):
     gc = g.C[0]
     assert gc
     layers = []  # type: List[List[Vertex]]
-    roots = [v for v in gc.sV if len(v.e_in()) == 0]  # taken from SugiyamaLayout.init_all()
+    roots = [
+        v for v in gc.sV if len(v.e_in()) == 0
+    ]  # taken from SugiyamaLayout.init_all()
     layers.append(roots)
     scanning = roots
 
@@ -31,4 +33,3 @@ def pos(G: nx.DiGraph, roots=None, g=None, xspace=20, yspace=20):
         for i, node in enumerate(layer):
             dict[node.data] = (i * xspace, -j * yspace)
     return dict
-
